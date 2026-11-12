@@ -1,5 +1,7 @@
 #include "Controllers/BankController.h"
 #include "Models/ClientRepo.h"
+#include "Controllers/TransactionController.h"
+
 #include "Views/ClientView.h"
 #include <vector>
 
@@ -143,6 +145,10 @@ namespace Controllers {
                 case eFindClient:
                     HandleFindClient(dataFilePath);
                     Views::PauseScreen();
+                    break;
+                
+                case eTransactions:
+                RunTransactionsMenu(dataFilePath);
                     break;
 
                 case eExit:
