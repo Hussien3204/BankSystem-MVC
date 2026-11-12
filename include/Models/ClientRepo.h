@@ -17,6 +17,10 @@ namespace Models {
     bool FindClientByAccountNumber(const std::string& accountNumber, const std::vector<stClient>& clients, stClient& outClient);
     bool ClientExistsByAccountNumber(const std::string& accountNumber, const std::string& filePath);
 
+
+    // Financial transaction operations (v2.0.0): atomic balance mutation and aggregation.
+    bool DepositOrWithdrawByAccountNumber(const std::string& accountNumber, double deltaAmount, const std::string& filePath, double& outNewBalance);
+    double CalculateTotalBalances(const std::vector<stClient>& clients);
 }
 }
 
