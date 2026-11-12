@@ -68,3 +68,12 @@ g++ -std=c++11 -Wall -Wextra -Werror -Wconversion -Iinclude tests/test_runner.cp
 
 .\build\RunTests.exe
 ```
+
+
+## Application Preview (v2.0.0)
+
+### Main Menu
+![Main Menu Screen](docs/screenshots/main-menu.png)
+
+### Transactions Subsystem
+![Transactions Menu Screen](docs/screenshots/transactions-menu.png)
