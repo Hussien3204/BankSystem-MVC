@@ -1,6 +1,7 @@
-#include <iostream>
+#include "Controllers/BankController.h"
 
 int main() {
-    std::cout << "Bank System MVC Architecture Initialized.\n";
+    const std::string clientsDataPath = "data/Clients.txt";
+    BankSystem::Controllers::RunBankSystem(clientsDataPath);
     return 0;
 }
