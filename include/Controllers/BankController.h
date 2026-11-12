@@ -12,9 +12,12 @@ namespace Controllers {
         eDeleteClient = 3,
         eUpdateClient = 4,
         eFindClient = 5,
-        eExit = 6
+        eTransactions = 6,
+        eExit = 7
     };
 
+
+    
     // Starts the main application event loop using the specified flat-file data source.
     void RunBankSystem(const std::string& dataFilePath);
 

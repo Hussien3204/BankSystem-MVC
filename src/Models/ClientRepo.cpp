@@ -101,12 +101,45 @@ namespace Models {
         }
         return false;
     }
-
+// Internal linkage: storage delimiter is encapsulated strictly within this translation unit.
     bool ClientExistsByAccountNumber(const std::string& accountNumber, const std::string& filePath) {
         const std::vector<stClient> clients = LoadClientsFromFile(filePath);
         stClient dummy;
         return FindClientByAccountNumber(accountNumber, clients, dummy);
     }
+
+// Financial transaction operations (v2.0.0): atomic balance mutation and aggregation.
+        bool DepositOrWithdrawByAccountNumber(const std::string& accountNumber, double deltaAmount, const std::string& filePath, double& outNewBalance) {
+        std::vector<stClient> clients = LoadClientsFromFile(filePath);
+
+        for (std::size_t i = 0; i < clients.size(); ++i) {
+            if (clients.at(i).AccountNumber == accountNumber) {
+                const double projectedBalance = clients.at(i).AccountBalance + deltaAmount;
+
+                // Prevent negative balance mutations at the persistence boundary.
+                if (projectedBalance < 0.0) {
+                    return false;
+                }
+
+                clients.at(i).AccountBalance = projectedBalance;
+                if (SaveClientsToFile(filePath, clients)) {
+                    outNewBalance = projectedBalance;
+                    return true;
+                }
+                return false;
+            }
+        }
+        return false;
+    }
+// Aggregation operation: computes the total balance across all clients in memory.
+    double CalculateTotalBalances(const std::vector<stClient>& clients) {
+        double total = 0.0;
+        for (std::size_t i = 0; i < clients.size(); ++i) {
+            total += clients.at(i).AccountBalance;
+        }
+        return total;
+    }
+
 
 }
 }

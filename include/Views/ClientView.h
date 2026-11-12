@@ -12,8 +12,9 @@ namespace Views {
     void ClearScreen();
     void PauseScreen();
 
-    // Renders primary navigation menu and returns validated user selection [1..6].
+    // Renders primary navigation menu and returns validated user selection [1..7].
     int ShowMainMenuAndReadChoice();
+
 
     // Presentation functions: strictly read-only access to model data via const references.
     void ShowSectionHeader(const std::string& title);
