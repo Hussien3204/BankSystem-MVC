@@ -7,19 +7,18 @@ namespace BankSystem {
 namespace Controllers {
 
     enum enMainMenuOptions {
-        eListClients = 1,
+        eListClients  = 1,
         eAddNewClient = 2,
         eDeleteClient = 3,
         eUpdateClient = 4,
-        eFindClient = 5,
+        eFindClient   = 5,
         eTransactions = 6,
-        eExit = 7
+        eManageUsers  = 7,
+        eLogout       = 8
     };
 
-
-    
-    // Starts the main application event loop using the specified flat-file data source.
-    void RunBankSystem(const std::string& dataFilePath);
+    // Launches the authenticated multi-session banking loop using client and user repositories.
+    void RunBankSystem(const std::string& clientsFilePath, const std::string& usersFilePath);
 
 }
 }

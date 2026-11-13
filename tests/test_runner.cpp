@@ -4,6 +4,7 @@
 #include <cmath>
 #include "Utils/StringUtils.h"
 #include "Models/ClientRepo.h"
+#include "Models/UserRepo.h"
 
 static bool AreDoublesEqual(double a, double b, double epsilon = 0.001) {
     return std::fabs(a - b) < epsilon;
@@ -84,19 +85,15 @@ static void TestTransactions() {
     BankSystem::Models::AppendClientToFile(tempFile, c1);
     BankSystem::Models::AppendClientToFile(tempFile, c2);
 
-    // 1. Verify Deposit (+500 to T100 -> 1500.00)
     double updatedBalance = 0.0;
     assert(BankSystem::Models::DepositOrWithdrawByAccountNumber("T100", 500.00, tempFile, updatedBalance) == true);
     assert(AreDoublesEqual(updatedBalance, 1500.00));
 
-    // 2. Verify Overdraft Guard (-2000 from 1500.00 must be rejected)
     assert(BankSystem::Models::DepositOrWithdrawByAccountNumber("T100", -2000.00, tempFile, updatedBalance) == false);
 
-    // 3. Verify Valid Withdraw (-300 from 1500.00 -> 1200.00)
     assert(BankSystem::Models::DepositOrWithdrawByAccountNumber("T100", -300.00, tempFile, updatedBalance) == true);
     assert(AreDoublesEqual(updatedBalance, 1200.00));
 
-    // 4. Verify Total Balances Aggregation (1200.00 + 2500.50 = 3700.50)
     const std::vector<BankSystem::Models::stClient> clients = BankSystem::Models::LoadClientsFromFile(tempFile);
     const double total = BankSystem::Models::CalculateTotalBalances(clients);
     assert(AreDoublesEqual(total, 3700.50));
@@ -105,11 +102,57 @@ static void TestTransactions() {
     std::cout << "[PASS] Financial Transactions unit tests verified.\n";
 }
 
+static void TestUsersAndPermissions() {
+    const std::string tempFile = "build/test_users.txt";
+    std::remove(tempFile.c_str());
+
+    BankSystem::Models::stUser admin;
+    admin.Username = "Admin";
+    admin.Password = "1234";
+    admin.Permissions = BankSystem::Models::ePermAll;
+
+    BankSystem::Models::stUser teller;
+    teller.Username = "User1";
+    teller.Password = "9999";
+    teller.Permissions = BankSystem::Models::ePermListClients | BankSystem::Models::ePermTransactions;
+
+    // 1. Verify O(1) Bitwise Permission Masks
+    assert(BankSystem::Models::HasPermission(admin, BankSystem::Models::ePermManageUsers) == true);
+    assert(BankSystem::Models::HasPermission(teller, BankSystem::Models::ePermListClients) == true);
+    assert(BankSystem::Models::HasPermission(teller, BankSystem::Models::ePermTransactions) == true);
+    assert(BankSystem::Models::HasPermission(teller, BankSystem::Models::ePermDeleteClient) == false);
+    assert(BankSystem::Models::HasPermission(teller, BankSystem::Models::ePermManageUsers) == false);
+
+    // 2. Verify Persistence & Authentication
+    assert(BankSystem::Models::AppendUserToFile(tempFile, admin) == true);
+    assert(BankSystem::Models::AppendUserToFile(tempFile, teller) == true);
+
+    BankSystem::Models::stUser loggedIn;
+    assert(BankSystem::Models::AuthenticateUser("User1", "wrong_pass", tempFile, loggedIn) == false);
+    assert(BankSystem::Models::AuthenticateUser("User1", "9999", tempFile, loggedIn) == true);
+    assert(loggedIn.Permissions == 33); // 1 (List) + 32 (Transactions) = 33
+
+    // 3. Verify Primary Admin Deletion Guard
+    std::vector<BankSystem::Models::stUser> users = BankSystem::Models::LoadUsersFromFile(tempFile);
+    for (std::size_t i = 0; i < users.size(); ++i) {
+        users.at(i).MarkForDelete = true; // Attempt to wipe everyone including Admin!
+    }
+    assert(BankSystem::Models::SaveUsersToFile(tempFile, users) == true);
+
+    const std::vector<BankSystem::Models::stUser> survivors = BankSystem::Models::LoadUsersFromFile(tempFile);
+    assert(survivors.size() == 1);
+    assert(survivors.at(0).Username == "Admin");
+
+    std::remove(tempFile.c_str());
+    std::cout << "[PASS] User Authentication, Bitwise RBAC, and Admin Guard verified.\n";
+}
+
 int main() {
-    std::cout << "=== Executing BankSystem Unit Test Suite (v2.0.0) ===\n";
+    std::cout << "=== Executing BankSystem Unit Test Suite (v3.0.0) ===\n";
     TestStringUtils();
     TestClientRepo();
     TestTransactions();
+    TestUsersAndPermissions();
     std::cout << "=== All Assertions Passed ===\n";
     return 0;
 }

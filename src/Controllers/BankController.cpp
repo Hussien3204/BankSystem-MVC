@@ -1,8 +1,10 @@
 #include "Controllers/BankController.h"
-#include "Models/ClientRepo.h"
 #include "Controllers/TransactionController.h"
-
+#include "Controllers/UserController.h"
+#include "Models/ClientRepo.h"
+#include "Models/UserRepo.h"
 #include "Views/ClientView.h"
+#include "Views/UserView.h"
 #include <vector>
 
 namespace BankSystem {
@@ -110,52 +112,81 @@ namespace Controllers {
         }
     }
 
-    static void ShowExitScreen() {
-        Views::ShowSectionHeader("Program Ends :-)");
+    // Centralized O(1) RBAC gatekeeper before dispatching protected controller actions.
+    static bool EnforcePermission(const Models::stUser& currentUser, Models::enUserPermissions requiredPerm) {
+        if (Models::HasPermission(currentUser, requiredPerm)) {
+            return true;
+        }
+        Views::ShowAccessDeniedScreen();
+        Views::PauseScreen();
+        return false;
     }
 
-    void RunBankSystem(const std::string& dataFilePath) {
-        bool isRunning = true;
+    void RunBankSystem(const std::string& clientsFilePath, const std::string& usersFilePath) {
+        // Outer loop manages authentication sessions cleanly without stack recursion on Logout.
+        while (true) {
+            Models::stUser currentUser = RunLoginScreen(usersFilePath);
+            bool sessionActive = true;
 
-        while (isRunning) {
-            const int rawChoice = Views::ShowMainMenuAndReadChoice();
-            const enMainMenuOptions choice = static_cast<enMainMenuOptions>(rawChoice);
+            while (sessionActive) {
+                const int rawChoice = Views::ShowMainMenuAndReadChoice();
+                const enMainMenuOptions choice = static_cast<enMainMenuOptions>(rawChoice);
 
-            switch (choice) {
-                case eListClients:
-                    HandleListClients(dataFilePath);
-                    Views::PauseScreen();
-                    break;
+                switch (choice) {
+                    case eListClients:
+                        if (EnforcePermission(currentUser, Models::ePermListClients)) {
+                            HandleListClients(clientsFilePath);
+                            Views::PauseScreen();
+                        }
+                        break;
 
-                case eAddNewClient:
-                    HandleAddNewClient(dataFilePath);
-                    Views::PauseScreen();
-                    break;
+                    case eAddNewClient:
+                        if (EnforcePermission(currentUser, Models::ePermAddClient)) {
+                            HandleAddNewClient(clientsFilePath);
+                            Views::PauseScreen();
+                        }
+                        break;
 
-                case eDeleteClient:
-                    HandleDeleteClient(dataFilePath);
-                    Views::PauseScreen();
-                    break;
+                    case eDeleteClient:
+                        if (EnforcePermission(currentUser, Models::ePermDeleteClient)) {
+                            HandleDeleteClient(clientsFilePath);
+                            Views::PauseScreen();
+                        }
+                        break;
 
-                case eUpdateClient:
-                    HandleUpdateClient(dataFilePath);
-                    Views::PauseScreen();
-                    break;
+                    case eUpdateClient:
+                        if (EnforcePermission(currentUser, Models::ePermUpdateClient)) {
+                            HandleUpdateClient(clientsFilePath);
+                            Views::PauseScreen();
+                        }
+                        break;
 
-                case eFindClient:
-                    HandleFindClient(dataFilePath);
-                    Views::PauseScreen();
-                    break;
-                
-                case eTransactions:
-                RunTransactionsMenu(dataFilePath);
-                    break;
+                    case eFindClient:
+                        if (EnforcePermission(currentUser, Models::ePermFindClient)) {
+                            HandleFindClient(clientsFilePath);
+                            Views::PauseScreen();
+                        }
+                        break;
 
-                case eExit:
-                    ShowExitScreen();
-                    Views::PauseScreen();
-                    isRunning = false;
-                    break;
+                    case eTransactions:
+                        if (EnforcePermission(currentUser, Models::ePermTransactions)) {
+                            RunTransactionsMenu(clientsFilePath);
+                        }
+                        break;
+
+                    case eManageUsers:
+                        if (EnforcePermission(currentUser, Models::ePermManageUsers)) {
+                            RunManageUsersMenu(usersFilePath);
+                            // Refresh active user permissions in case current user updated their own role.
+                            const std::vector<Models::stUser> updatedUsers = Models::LoadUsersFromFile(usersFilePath);
+                            Models::FindUserByUsername(currentUser.Username, updatedUsers, currentUser);
+                        }
+                        break;
+
+                    case eLogout:
+                        sessionActive = false;
+                        break;
+                }
             }
         }
     }

@@ -19,8 +19,8 @@ namespace Views {
         std::cout << "\nPress Enter to go back to Main Menu...";
         std::cin.get();
     }
-// this is the function that shows the main menu and reads the user choice, it is used in the main.cpp file to navigate through the application
-     int ShowMainMenuAndReadChoice() {
+// this is 
+      int ShowMainMenuAndReadChoice() {
         ClearScreen();
         std::cout << "===========================================\n";
         std::cout << "\t\tMain Menue Screen\n";
@@ -31,11 +31,13 @@ namespace Views {
         std::cout << "\t[4] Update Client Info.\n";
         std::cout << "\t[5] Find Client.\n";
         std::cout << "\t[6] Transactions.\n";
-        std::cout << "\t[7] Exit.\n";
+        std::cout << "\t[7] Manage Users.\n";
+        std::cout << "\t[8] Logout.\n";
         std::cout << "===========================================\n";
 
-        return Utils::ReadIntInRange("Choose what do you want to do? (1 to 7)? ", 1, 7);
+        return Utils::ReadIntInRange("Choose what do you want to do? [1 to 8]? ", 1, 8);
     }
+
 
     void ShowSectionHeader(const std::string& title) {
         ClearScreen();
