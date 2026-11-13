@@ -6,11 +6,14 @@ A modular C++11 command-line banking system built with strict **Procedural MVC A
 
 ## Application Preview
 
-### Main Menu
+### 1. Main Menu (v3.0.0)
 ![Main Menu Screen](docs/screenshots/main-menu.png)
 
-### Transactions Subsystem
+### 2. Transactions Subsystem (v2.0.0)
 ![Transactions Menu Screen](docs/screenshots/transactions-menu.png)
+
+### 3. User Management & RBAC Subsystem (v3.0.0)
+![Manage Users Menu Screen](docs/screenshots/manage-users-menu.png)
 
 ---
 
