@@ -6,14 +6,14 @@ A modular C++11 command-line banking system built with strict **Procedural MVC A
 
 ## Application Preview
 
-### 1. Main Menu (v3.0.0)
-![Main Menu Screen](docs/screenshots/main-menu.png)
+### 1. Core Client Management (v1.0.0)
+![Main Menu Screen](docs/screenshots/1.png)
 
 ### 2. Transactions Subsystem (v2.0.0)
-![Transactions Menu Screen](docs/screenshots/transactions-menu.png)
+![Transactions Menu Screen](docs/screenshots/2.png)
 
 ### 3. User Management & RBAC Subsystem (v3.0.0)
-![Manage Users Menu Screen](docs/screenshots/manage-users-menu.png)
+![Manage Users Menu Screen](docs/screenshots/3.png)
 
 ---
 
@@ -34,8 +34,8 @@ The codebase strictly separates flat-file persistence, console presentation, and
 
 - **Zero-OOP Modular Design:** Enforces strict encapsulation using `struct`, `enum`, `namespace`, and `static` internal linkage without class overhead.
 - **Bitwise RBAC Security (O(1)):** Stores 7 distinct screen capabilities inside a single 32-bit `int` bitmask evaluated via single-cycle CPU bitwise `AND`/`OR` operations.
-- **Stack-Safe Session Loops:** Iterative outer/inner event loops handle `Login`, `Logout`, `Transactions`, and `Manage Users` transitions with O(1) stack memory overhead (zero mutual recursion).
-- **Memory Discipline & RAII:** Memory-aligned structs, `const` reference parameter passing, pre-allocated string/vector buffers (`reserve`), bounds-checked `.at()` access, and RAII file streams.
+- **Stack-Safe Session Loops:** Iterative outer/inner event loops handle `Login`, `Logout`, `Transactions`, and `Manage Users` transitions with O(1) stack memory overhead.
+- **Memory Discipline & RAII:** Memory-aligned structs, `const` reference parameter passing, pre-allocated buffers (`reserve`), bounds-checked `.at()` access, and RAII file streams.
 - **Compiler Strictness:** Zero warnings under `-Wall -Wextra -Werror -Wconversion`.
 
 ---
@@ -44,7 +44,7 @@ The codebase strictly separates flat-file persistence, console presentation, and
 
 - **v1.0.0 (Core Client CRUD):** List, Add, Soft-Delete, Update, and Find Clients.
 - **v2.0.0 (Transactions Module):** Deposit, Withdraw (with Overdraft Guard), and Total Balances aggregation.
-- **v3.0.0 (Auth & User Management):** Multi-session Login/Logout gate, User CRUD, primary `Admin` deletion guard, and granular Bitwise Permissions (`Access Denied` enforcement).
+- **v3.0.0 (Auth & User Management):** Multi-session Login/Logout gate, User CRUD, primary `Admin` deletion guard, and granular Bitwise Permissions.
 
 ---
 
