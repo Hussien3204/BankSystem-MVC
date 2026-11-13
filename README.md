@@ -1,79 +1,59 @@
-# Bank Client Management System (Procedural MVC)
+# Bank Management System (Procedural MVC - v3.0.0)
 
-A modular C++11 command-line banking system built with strict **Procedural MVC Architecture**, zero-OOP design, deterministic memory discipline, and automated unit testing.
-
----
-
-## Architectural Overview
-
-The codebase isolates persistence, presentation, and routing into separate translation units using namespaces and header/source decoupling:
-
-```text
-BankSystem-MVC/
-??? include/                  # Public interfaces & data contracts (.h)
-?   ??? Models/               # Client memory layout & persistence interface
-?   ??? Views/                # Console UI rendering & input collectors
-?   ??? Controllers/          # Menu routing & workflow orchestration
-?   ??? Utils/                # String manipulation & stream guards
-??? src/                      # Concrete implementations (.cpp)
-??? tests/                    # Assertion-based automated test runner
-??? data/                     # Flat-file database (Clients.txt)
-```
+A modular C++11 command-line banking system built with strict **Procedural MVC Architecture**, zero-OOP design, bitwise role-based access control (RBAC), deterministic memory discipline, and automated unit testing.
 
 ---
 
-## Core Engineering Highlights
-
-* **Zero-OOP Modular Architecture:** Implements clean separation via procedural modules (`struct`, `enum`, `namespace`, and `static` internal linkage) without class hierarchy overhead.
-* **Memory Safety & Layout Optimization:**
-  * Memory alignment in `stClient` orders members to eliminate structure padding.
-  * Read-only data passes strictly by `const` reference (`const T&`).
-  * Non-destructive string parsing runs in O(N) time with pre-allocated vector capacity (`reserve`).
-  * File streams follow **RAII** patterns for deterministic handle lifecycle management.
-* **Resilient Stream Handling:** Guards console input against type mismatch and infinite loop errors via `std::cin.clear()` and buffer flushes.
-* **Compiler Strictness:** Compiles cleanly with zero warnings under `-Wall -Wextra -Werror -Wconversion`.
-* **Automated Unit Testing:** Dedicated test runner validates string splitting, file operations, soft deletion, and balance calculations before deployment.
-
----
-
-## System Capabilities (v2.0.0)
-
-### 1. Client Management Subsystem
-* **Show Client List:** Formatted tabular display of all registered bank clients.
-* **Add New Client:** Record creation with duplicate account number validation.
-* **Delete Client:** Confirmation card with soft-delete file filtering.
-* **Update Client Info:** In-place record modification and disk synchronization.
-* **Find Client:** Account lookup with formatted card output.
-
-### 2. Transactions Subsystem
-* **Deposit:** Direct balance increment with immediate persistence.
-* **Withdraw:** Safe balance deduction with overdraft protection.
-* **Total Balances:** Tabular balance summary with global liquidity aggregation.
-
-
----
-
-## Build & Run Instructions (PowerShell / MinGW-w64)
-
-### 1. Build and Run Main Application
-```powershell
-g++ -std=c++11 -Wall -Wextra -Werror -Wconversion -Iinclude src/main.cpp src/Utils/StringUtils.cpp src/Utils/InputUtils.cpp src/Models/ClientRepo.cpp src/Views/ClientView.cpp src/Views/TransactionView.cpp src/Controllers/BankController.cpp src/Controllers/TransactionController.cpp -o build/BankSystem.exe
-
-Start-Process .\build\BankSystem.exe
-```
-
-### 2. Build and Run Test Suite
-```powershell
-g++ -std=c++11 -Wall -Wextra -Werror -Wconversion -Iinclude tests/test_runner.cpp src/Utils/StringUtils.cpp src/Utils/InputUtils.cpp src/Models/ClientRepo.cpp -o build/RunTests.exe
-
-.\build\RunTests.exe
-```
-
-
-## Application Preview (v2.0.0)
+## Application Preview
 
 ### Main Menu
 ![Main Menu Screen](docs/screenshots/main-menu.png)
 
 ### Transactions Subsystem
 ![Transactions Menu Screen](docs/screenshots/transactions-menu.png)
+
+---
+
+## Architectural Structure
+
+The codebase strictly separates flat-file persistence, console presentation, and workflow routing across isolated translation units:
+
+- **include/Models & src/Models:** `Client.h`, `User.h`, `ClientRepo`, and `UserRepo`
+- **include/Views & src/Views:** `ClientView`, `TransactionView`, and `UserView`
+- **include/Controllers & src/Controllers:** `BankController`, `TransactionController`, and `UserController`
+- **include/Utils & src/Utils:** `StringUtils` and `InputUtils`
+- **tests/:** Automated assertion-based unit test runner (`test_runner.cpp`)
+- **data/:** Flat-file storage (`Clients.txt` and `Users.txt`)
+
+---
+
+## Core Engineering Highlights
+
+- **Zero-OOP Modular Design:** Enforces strict encapsulation using `struct`, `enum`, `namespace`, and `static` internal linkage without class overhead.
+- **Bitwise RBAC Security (O(1)):** Stores 7 distinct screen capabilities inside a single 32-bit `int` bitmask evaluated via single-cycle CPU bitwise `AND`/`OR` operations.
+- **Stack-Safe Session Loops:** Iterative outer/inner event loops handle `Login`, `Logout`, `Transactions`, and `Manage Users` transitions with O(1) stack memory overhead (zero mutual recursion).
+- **Memory Discipline & RAII:** Memory-aligned structs, `const` reference parameter passing, pre-allocated string/vector buffers (`reserve`), bounds-checked `.at()` access, and RAII file streams.
+- **Compiler Strictness:** Zero warnings under `-Wall -Wextra -Werror -Wconversion`.
+
+---
+
+## Release History & Capabilities
+
+- **v1.0.0 (Core Client CRUD):** List, Add, Soft-Delete, Update, and Find Clients.
+- **v2.0.0 (Transactions Module):** Deposit, Withdraw (with Overdraft Guard), and Total Balances aggregation.
+- **v3.0.0 (Auth & User Management):** Multi-session Login/Logout gate, User CRUD, primary `Admin` deletion guard, and granular Bitwise Permissions (`Access Denied` enforcement).
+
+---
+
+## Build & Run Commands (PowerShell / MinGW-w64)
+
+### 1. Build and Launch Application (Standalone Window)
+    $sources = (Get-ChildItem -Path src -Recurse -Filter *.cpp).FullName
+    g++ -std=c++11 -Wall -Wextra -Werror -Wconversion -Iinclude $sources -o build/BankSystem.exe
+    if ($?) { Start-Process .\build\BankSystem.exe }
+
+Default Administrator Credentials: **Username:** `Admin` | **Password:** `1234`
+
+### 2. Build and Execute Unit Test Suite
+    g++ -std=c++11 -Wall -Wextra -Werror -Wconversion -Iinclude tests/test_runner.cpp src/Utils/StringUtils.cpp src/Utils/InputUtils.cpp src/Models/ClientRepo.cpp src/Models/UserRepo.cpp -o build/RunTests.exe
+    .\build\RunTests.exe
