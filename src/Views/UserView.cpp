@@ -41,15 +41,15 @@ namespace Views {
         std::cout << "===========================================\n";
         std::cout << "\t\tManage Users Menue Screen\n";
         std::cout << "===========================================\n";
-        std::cout << "\t[1] List Users.\n";
-        std::cout << "\t[2] Add New User.\n";
-        std::cout << "\t[3] Delete User.\n";
-        std::cout << "\t[4] Update User.\n";
-        std::cout << "\t[5] Find User.\n";
-        std::cout << "\t[6] Main Menue.\n";
+        std::cout << "\t(1) List Users.\n";
+        std::cout << "\t(2) Add New User.\n";
+        std::cout << "\t(3) Delete User.\n";
+        std::cout << "\t(4) Update User.\n";
+        std::cout << "\t(5) Find User.\n";
+        std::cout << "\t(6) Main Menue.\n";
         std::cout << "===========================================\n";
 
-        return Utils::ReadIntInRange("Choose what do you want to do? [1 to 6]? ", 1, 6);
+        return Utils::ReadIntInRange("Choose what do you want to do? (1 to 6)? ", 1, 6);
     }
 
     void ShowUserList(const std::vector<Models::stUser>& users) {
